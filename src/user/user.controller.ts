@@ -9,6 +9,17 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Prisma, User } from '@prisma/client';
+import { ApiProperty, ApiBody } from '@nestjs/swagger';
+
+class Create implements Prisma.UserCreateInput {
+  @ApiProperty()
+  name: string;
+}
+
+class Update implements Prisma.UserUpdateInput {
+  @ApiProperty()
+  name: string;
+}
 
 @Controller('user')
 export class UserController {
@@ -20,6 +31,7 @@ export class UserController {
   }
 
   @Post()
+  @ApiBody({ type: Create })
   async create(@Body() params: Prisma.UserCreateInput): Promise<User> {
     return this.userService.createUser(params);
   }
@@ -30,10 +42,14 @@ export class UserController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body('name') name: string): Promise<User> {
+  @ApiBody({ type: Update })
+  update(
+    @Param('id') id: string,
+    @Body() data: Prisma.UserUpdateInput,
+  ): Promise<User> {
     return this.userService.updateUser({
       where: { id: Number(id) },
-      data: { name },
+      data,
     });
   }
 
